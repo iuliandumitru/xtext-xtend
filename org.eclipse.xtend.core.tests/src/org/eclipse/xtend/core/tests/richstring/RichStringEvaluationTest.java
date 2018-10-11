@@ -7,7 +7,9 @@
  *******************************************************************************/
 package org.eclipse.xtend.core.tests.richstring;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,7 +28,7 @@ import org.eclipse.xtext.common.types.JvmFormalParameter;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.resource.XtextResourceSet;
 import org.eclipse.xtext.util.CancelIndicator;
-import org.eclipse.xtext.util.StringInputStream;
+import org.eclipse.xtext.util.LazyStringInputStream;
 import org.eclipse.xtext.validation.CheckMode;
 import org.eclipse.xtext.validation.Issue;
 import org.eclipse.xtext.xbase.XBooleanLiteral;
@@ -275,9 +277,11 @@ public class RichStringEvaluationTest extends AbstractRichStringEvaluationTest {
 
 	protected XtendFile file(String string, boolean validate) throws Exception {
 		XtextResourceSet set = resourceSetProvider.get();
+		Map<Object, Object> loadOptions = set.getLoadOptions();
+		loadOptions.put(XtextResource.OPTION_ENCODING, StandardCharsets.ISO_8859_1.name());
 		String fileName = getFileName(string);
 		Resource resource = set.createResource(URI.createURI(fileName + ".xtend"));
-		resource.load(new StringInputStream(string), null);
+		resource.load(new LazyStringInputStream(string, StandardCharsets.ISO_8859_1.name()), loadOptions);
 		assertEquals(resource.getErrors().toString(), 0, resource.getErrors().size());
 		if (validate) {
 			List<Issue> issues = ((XtextResource) resource).getResourceServiceProvider().getResourceValidator()
